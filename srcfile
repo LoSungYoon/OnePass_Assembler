@@ -1,0 +1,41 @@
+test3    START   0x1000
+first    STL     retadr
+         JSUB    sum               .sum서브루틴으로 점프
+         LDA     total 
+         J       last
+
+retadr   RESW    1                 
+ZERO     WORD    0
+THREE    WORD    3
+           
+sum      LDA     ZERO              .sum시작
+         STA     total
+         STA     index
+         LDX     index
+         LDA     table, X
+         STA     min               .min을 첫번쨰 원소로 초기화
+loop     LDX     index             .루프시작
+         LDA     min
+         COMP    table, X          .table원소와 현재 min(A)비교
+         JGT     replace           .A가 테이블값보다 크면 교환
+replaced LDA     index
+         ADD     THREE             
+         STA     index             .index+3후 저장
+         COMP    count             .15보다 크면 루프종료
+         JLT     loop              .jump if less than 'comp count'의 결과
+         RSUB    .서브루틴 이전 주소로 복귀(L레지스터)
+
+replace  LDA     table, X
+         STA     min               .min값 최신화
+         J       replaced          .교환 완료 후 복귀
+
+table    WORD    12
+         WORD    9
+         WORD    8
+         WORD    22
+         WORD    6
+count    WORD    15               
+total    RESW    1
+index    RESW    1
+min      RESW    1
+last     END     first
