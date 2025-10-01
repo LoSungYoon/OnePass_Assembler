@@ -7,7 +7,7 @@ first    STL     retadr
 retadr   RESW    1                 
 ZERO     WORD    0
 THREE    WORD    3
-           
+
 sum      LDA     ZERO              .sum시작
          STA     total
          STA     index

@@ -1,40 +1,43 @@
 Line      Loc       Label          Opcode         Operand        
 -----------------------------------------------------------------
-5         1000      test3          START          0x1000         
-10        1000      first          STL            retadr         
-15        1003                     JSUB           sum               .sum서브루틴으로 점프
-20        1006                     LDA            total          
-25        1009                     J              last           
-35        100C      retadr         RESW           1                 
-40        100F      ZERO           WORD           0              
-45        1012      THREE          WORD           3              
-50        1015                                                   
-55        1018      sum            LDA            ZERO              .sum시작
-60        101B                     STA            total          
-65        101E                     STA            index          
-70        1021                     LDX            index          
-75        1024                     LDA            table, X       
-80        1027                     STA            min               .min을 첫번쨰 원소로 초기화
-85        102A      loop           LDX            index             .루프시작
-90        102D                     LDA            min            
-95        1030                     COMP           table, X          .table원소와 현재 min(A)비교
-100       1033                     JGT            replace           .A가 테이블값보다 크면 교환
-105       1036      replaced       LDA            index          
-110       1039                     ADD            THREE             
-115       103C                     STA            index             .index+3후 저장
-120       103F                     COMP           count             .15보다 크면 루프종료
-125       1042                     JLT            loop              .jump if less than 'comp count'의 결과
-130       1045                     RSUB           .서브루틴 이전 주소로 복귀(L레지스터)
-140       1048      replace        LDA            table, X       
-145       104B                     STA            min               .min값 최신화
-150       104E                     J              replaced          .교환 완료 후 복귀
-160       1051      table          WORD           12             
-165       1054                     WORD           9              
-170       1057                     WORD           8              
-175       105A                     WORD           22             
-180       105D                     WORD           6              
-185       1060      count          WORD           15               
-190       1063      total          RESW           1              
-195       1066      index          RESW           1              
-200       1069      min            RESW           1              
-205       106C      last           END            first          
+1         1000      test3          START          0x1000         
+2         1000      first          STL            retadr         
+3         1003                     JSUB           sum               .sum서브루틴으로 점프
+4         1006                     LDA            total          
+5         1009                     J              last           
+6                                                                
+7         100C      retadr         RESW           1                 
+8         100F      ZERO           WORD           0              
+9         1012      THREE          WORD           3              
+10                                                               
+11        1015      sum            LDA            ZERO              .sum시작
+12        1018                     STA            total          
+13        101B                     STA            index          
+14        101E                     LDX            index          
+15        1021                     LDA            table, X       
+16        1024                     STA            min               .min을 첫번쨰 원소로 초기화
+17        1027      loop           LDX            index             .루프시작
+18        102A                     LDA            min            
+19        102D                     COMP           table, X          .table원소와 현재 min(A)비교
+20        1030                     JGT            replace           .A가 테이블값보다 크면 교환
+21        1033      replaced       LDA            index          
+22        1036                     ADD            THREE             
+23        1039                     STA            index             .index+3후 저장
+24        103C                     COMP           count             .15보다 크면 루프종료
+25        103F                     JLT            loop              .jump if less than 'comp count'의 결과
+26        1042                     RSUB           .서브루틴 이전 주소로 복귀(L레지스터)
+27                                                               
+28        1045      replace        LDA            table, X       
+29        1048                     STA            min               .min값 최신화
+30        104B                     J              replaced          .교환 완료 후 복귀
+31                                                               
+32        104E      table          WORD           12             
+33        1051                     WORD           9              
+34        1054                     WORD           8              
+35        1057                     WORD           22             
+36        105A                     WORD           6              
+37        105D      count          WORD           15               
+38        1060      total          RESW           1              
+39        1063      index          RESW           1              
+40        1066      min            RESW           1              
+41        1069      last           END            first          

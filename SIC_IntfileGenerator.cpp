@@ -8,22 +8,22 @@
 
 using namespace std;
 
-// SIC instruction format size (in bytes)
+// SIC 명령어 형식 크기 (바이트 단위)
 const int INSTRUCTION_SIZE = 3;
 const int WORD_SIZE = 3;
 const int RESW_MULTIPLIER = 3;
 const int RESB_MULTIPLIER = 1;
 
-// Structure to store instruction information
+// 명령어 정보를 저장하기 위한 구조체
 struct Instruction {
     string mnemonic;
     int format;
 };
 
-// Initialize SIC instruction set
+// SIC 명령어 집합 초기화
 map<string, Instruction> createInstructionSet() {
     map<string, Instruction> instructions;
-    // Format 3 instructions (standard SIC instructions)
+    // 포맷3 명령어 (표준 SIC 명령어)
     vector<string> format3 = {"ADD", "AND", "COMP", "DIV", "J", "JEQ", "JGT", "JLT", 
                              "JSUB", "LDA", "LDCH", "LDL", "LDX", "MUL", "OR", "RD", 
                              "RSUB", "STA", "STCH", "STL", "STSW", "STX", "SUB", "TD", 
@@ -33,7 +33,7 @@ map<string, Instruction> createInstructionSet() {
         instructions[instr] = {instr, 3};
     }
     
-    // Assembler directives
+    // 어셈블러 지시어
     instructions["START"] = {"START", 0};
     instructions["END"] = {"END", 0};
     instructions["RESW"] = {"RESW", 0};
@@ -44,7 +44,7 @@ map<string, Instruction> createInstructionSet() {
     return instructions;
 }
 
-// Calculate the size of BYTE operand
+// BYTE 연산자의 크기 계산
 int calculateByteOperandSize(const string& operand) {
     if (operand.empty() || operand.length() < 3) return 1;
     
@@ -59,26 +59,26 @@ int calculateByteOperandSize(const string& operand) {
     return 1;
 }
 
-// Convert hex string to integer
+// 16진수 문자열을 정수로 변환
 int hexToInt(const string& hex_str) {
     return stoi(hex_str, nullptr, 16);
 }
 
 int main(int argc, char* argv[]) {
-    // Check if correct number of arguments are provided
+    // 올바른 수의 명령행 인수가 제공되었는지 확인
     if (argc != 3) {
         cout << "Usage: " << argv[0] << " <srcfile> <intfile>" << endl;
         return 1;
     }
 
-    // Open source file for reading
+    // 읽기용 소스 파일 열기
     ifstream srcFile(argv[1]);
     if (!srcFile) {
         cout << "Error: Cannot open source file " << argv[1] << endl;
         return 1;
     }
 
-    // Open intermediate file for writing
+    // 쓰기용 중간 파일 열기
     ofstream intFile(argv[2]);
     if (!intFile) {
         cout << "Error: Cannot create intermediate file " << argv[2] << endl;
@@ -87,9 +87,9 @@ int main(int argc, char* argv[]) {
     }
 
     string line;
-    int lineNum = 5;  // Start line numbers from 5, incrementing by 5
+    int lineNum = 1;  // Start line numbers from 1, incrementing by 1
     
-    // Write header to intermediate file
+    // 중간 파일에 헤더 작성
     intFile << left << setw(10) << "Line" 
             << setw(10) << "Loc" 
             << setw(15) << "Label" 
@@ -97,27 +97,39 @@ int main(int argc, char* argv[]) {
             << setw(15) << "Operand" << endl;
     intFile << string(65, '-') << endl;
 
-    // Initialize instruction set
+    // 명령어 집합 초기화
     auto instructions = createInstructionSet();
     
-    // Variables for location counter
+    // 위치 카운터 변수
     int LOCCTR = 0;
     bool programStarted = false;
     
-    // Process each line of the source file
+    // 소스 파일의 각 줄 처리
     while (getline(srcFile, line)) {
         string label, opcode, operand;
         
-        // Skip empty lines and comments (lines starting with .)
-        if (line.empty() || line[0] == '.') {
-            lineNum += 5;
+        // 빈 줄과 주석 처리 (점으로 시작하는 줄)
+        if (line.empty()) {
+            // 빈 줄을 LOC 없이 중간 파일에 작성
+            intFile << left << setw(10) << lineNum 
+                   << setw(10) << "" 
+                   << setw(15) << "" 
+                   << setw(15) << "" 
+                   << setw(15) << "" << endl;
+            lineNum += 1;
+            continue;
+        }
+        
+        // 주석 줄 건너뛰기
+        if (line[0] == '.') {
+            lineNum += 1;
             continue;
         }
 
-        // Create a string stream for parsing
+        // 구문 분석을 위한 문자열 스트림 생성
         istringstream iss(line);
         
-        // Check if the line starts with whitespace (no label)
+        // 줄이 공백으로 시작하는지 확인 (레이블 없음)
         if (line[0] == ' ' || line[0] == '\t') {
             label = "";
             iss >> opcode;
@@ -127,14 +139,14 @@ int main(int argc, char* argv[]) {
             getline(iss, operand);
         }
 
-        // Trim leading/trailing whitespace from operand
+        // 연산자의 앞뒤 공백 제거
         while (!operand.empty() && (operand[0] == ' ' || operand[0] == '\t'))
             operand = operand.substr(1);
         
-        // Convert opcode to uppercase for case-insensitive comparison
+        // 대소문자 구분 없는 비교를 위해 opcode를 대문자로 변환
         transform(opcode.begin(), opcode.end(), opcode.begin(), ::toupper);
         
-        // Handle START directive
+        // START 지시어 처리
         if (opcode == "START") {
             if (!operand.empty()) {
                 LOCCTR = hexToInt(operand);
@@ -142,18 +154,18 @@ int main(int argc, char* argv[]) {
             programStarted = true;
         }
         
-        // Format location counter as hexadecimal
+        // 위치 카운터를 16진수 형식으로 변환
         stringstream locHex;
         locHex << uppercase << hex << setw(4) << setfill('0') << LOCCTR;
         
-        // Write to intermediate file
+        // 중간 파일에 쓰기
         intFile << left << setw(10) << lineNum 
                 << setw(10) << locHex.str()
                 << setw(15) << label 
                 << setw(15) << opcode 
                 << setw(15) << operand << endl;
 
-        // Update location counter based on instruction type
+        // 명령어 타입에 따라 위치 카운터 업데이트
         if (programStarted && opcode != "END") {
             if (instructions.find(opcode) != instructions.end()) {
                 if (opcode == "RESW") {
@@ -168,15 +180,15 @@ int main(int argc, char* argv[]) {
                     LOCCTR += instructions[opcode].format;
                 }
             } else {
-                // Assume it's a standard instruction if not found
+                // 찾을 수 없는 경우 표준 명령어로 가정
                 LOCCTR += INSTRUCTION_SIZE;
             }
         }
 
-        lineNum += 5;
+        lineNum += 1;
     }
 
-    // Close files
+    // 파일 닫기
     srcFile.close();
     intFile.close();
 
